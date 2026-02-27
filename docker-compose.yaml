@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  spark-master:
+    image: apache/spark:3.5.0
+    container_name: spark-master
+    user: root # Nécessaire pour avoir les droits d'écriture sur le volume partagé
+    ports:
+      - "8080:8080" # UI Master
+      - "7077:7077" # Communication Spark
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+    volumes:
+      - ./tp_projects:/opt/spark/work-dir # Dossier de travail officiel de l'image
+
+  spark-worker:
+    image: apache/spark:3.5.0
+    container_name: spark-worker
+    user: root
+    depends_on:
+      - spark-master
+    ports:
+      - "8081:8081" # UI Worker
+    # On indique au worker l'adresse du master
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    volumes:
+      - ./tp_projects:/opt/spark/work-dir
