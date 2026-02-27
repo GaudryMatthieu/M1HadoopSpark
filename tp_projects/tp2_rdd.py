@@ -4,7 +4,7 @@ from pyspark import SparkConf, SparkContext
 logging.basicConfig(level=logging.INFO)
 
 if __name__ == '__main__':
-    logging.info("tp1 started")
+    logging.info("tp2 started")
     # 1. creation de la commande de lancement de l'applciation 
     config = SparkConf() \
         .setAppName("tp1"+str(time.time())) \
@@ -15,10 +15,13 @@ if __name__ == '__main__':
     context.setLogLevel("WARN")
 
     # 3. creation du RDD
-    data = [('Alpha', 34), ('Beta', 1), ('Charlie', 23), ('Delta', 100)]
-    rdd = context.parallelize(data)
+    messages = context.textFile("logs.txt")
+    errors = messages.filter(lambda msg: "ERROR" in msg) \
+        .map(lambda msg: (msg.split(":")[3], 1)) \
+        .reduceByKey(lambda a, b: a + b)
 
-    # 4. transformation du RDD 
-    logging.info("nb alt = "+str(rdd.count()))
+    for error in errors.collect():
+        logging.info("error"+str(error))
+
     context.stop()
-    logging.info("tp1 ended")
+    logging.info("tp2 ended")

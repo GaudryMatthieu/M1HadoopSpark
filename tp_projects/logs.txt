@@ -1,0 +1,14 @@
+2026-02-27 10:01:05 INFO: Tentative de connexion de l'utilisateur admin
+2026-02-27 10:01:12 ERROR: SQL_CONNECTION_FAILURE - Base de données injoignable
+2026-02-27 10:02:45 WARN: Latence élevée détectée sur le nœud 3
+2026-02-27 10:03:01 INFO: Batch de données reçu (150 Mo)
+2026-02-27 10:03:15 ERROR: AUTH_FAILURE - Mot de passe incorrect pour user_12
+2026-02-27 10:04:20 INFO: Nettoyage des fichiers temporaires terminé
+2026-02-27 10:05:00 ERROR: TIMEOUT - Le service externe ne répond pas
+2026-02-27 10:05:12 ERROR: SQL_CONNECTION_FAILURE - Tentative de reconnexion échouée
+2026-02-27 10:06:30 WARN: Mémoire vive utilisée à 85%
+2026-02-27 10:07:45 ERROR: AUTH_FAILURE - Tentative d'accès brute-force détectée
+2026-02-27 10:08:10 INFO: Backup système démarré
+2026-02-27 10:09:55 ERROR: DISK_FULL - Plus d'espace sur /var/log
+2026-02-27 10:10:05 ERROR: SQL_CONNECTION_FAILURE - Abandon de la session
+2026-02-27 10:11:05 ERROR: SQL_CONNECTION_FAILURE - Abandon de la session
