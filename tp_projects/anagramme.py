@@ -15,7 +15,9 @@ if __name__ == '__main__':
     # 1. creation de la commande de lancement de l'applciation 
     config = SparkConf() \
         .setAppName("anagramme"+str(time.time())) \
-        .setMaster("local[*]")
+        .setMaster("local[*]") \
+        .set("spark.eventLog.enabled", "true") \
+        .set("spark.eventLog.dir", "events")
 
     # 2. creation du contexte spark
     context = SparkContext(conf=config)
@@ -36,6 +38,7 @@ if __name__ == '__main__':
 
     word_sorted.coalesce(1) \
         .saveAsTextFile(output_dir)
-
+    print("Type any key to finish...")
+    token = input()
     context.stop()
     logging.info("Ended")
