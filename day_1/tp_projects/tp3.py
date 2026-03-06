@@ -2,6 +2,7 @@ import logging
 import time
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SparkSession
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DateType, DoubleType
 from pyspark.sql.functions import desc, asc
 
 
@@ -20,32 +21,24 @@ if __name__ == '__main__':
     
     session.sparkContext.setLogLevel("WARN")
 
-    sportDF = session.read \
-        .option("header", "true") \
-        .option("delimiter", ";") \
-        .option("encoding", "UTF-8") \
-        .option("inferSchema", "true") \
-        .option("locale", "fr_FR") \
-        .csv("hdfs://namenode:9000/lic-data-2023.csv")
+    shema = StructType([ StructField("transaction_id", IntegerType(), True),
+                         StructField("vendeur_id", IntegerType(), True),
+                         StructField("vendeur_nom", StringType(), True), 
+                         StructField("montant", DoubleType(), True), 
+                         StructField("date", DateType(), True) 
+                    ])
+
+    sportDF = session.read.csv("hdfs://namenode:9000/ventes.csv", header=True, schema=shema)
     
     sportDF.printSchema()
 
-    resultDF = sportDF.select("Code", "Fédération", "Total") \
-        .groupBy("Code", "Fédération") \
-        .sum("Total") \
-        .withColumnRenamed("sum(Total)", "Total") \
-        .orderBy(desc("Total"), asc("Code"))
-        
-    resultDF.show(10, truncate=False)
+    # Rechercher les fédérations sportives les plus représentées
 
-    # Rechercher les fédérations sportives les plus représentées 
-    # sportDF.createOrReplaceTempView("sports")
-    # resultDF = session.sql(""" 
-    #     SELECT Code, `Fédération`, SUM(Total) AS Total
-    #     FROM sports
-    #     GROUP BY Code, `Fédération`
-    #     ORDER BY Total DESC
-    # """)
+    resultDF = sportDF.select("vendeur_id", "vendeur_nom", "montant") \
+        .groupBy("vendeur_id", "vendeur_nom") \
+        .sum("montant") \
+        .withColumnRenamed("sum(montant)", "montant") \
+        .orderBy(desc("montant"), asc("vendeur_id"))
 
     # resultDF.coalesce(1).write \
     #     .option("header", "true") \
@@ -58,9 +51,9 @@ if __name__ == '__main__':
     # Ajouter le fichier dans ma base Mongo
     resultDF.write \
         .format("com.mongodb.spark.sql") \
-        .option("uri", "mongodb://mongodb:27017/hexagonesports") \
-        .option("database", "hexagonesports") \
-        .option("collection", "sports") \
+        .option("uri", "mongodb://mongodb:27017/ventes") \
+        .option("database", "ventes") \
+        .option("collection", "ventes") \
         .mode("overwrite") \
         .save()
 
