@@ -1,15 +1,17 @@
+version: '3.8'
+
 services:
   spark-master:
     image: apache/spark:3.5.0
     container_name: spark-master
-    user: root # Nécessaire pour avoir les droits d'écriture sur le volume partagé
+    user: root
     ports:
-      - "8080:8080" # UI Master
-      - "7077:7077" # Communication Spark
-      - "4040:4040" # UI Application
+      - "8080:8080"
+      - "7077:7077"
+      - "4040:4040"
     command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
     volumes:
-      - ./tp_projects:/opt/spark/work-dir # Dossier de travail officiel de l'image
+      - ./tp_projects:/opt/spark/work-dir 
 
   spark-worker:
     image: apache/spark:3.5.0
@@ -18,13 +20,29 @@ services:
     depends_on:
       - spark-master
     ports:
-      - "8081:8081" # UI Worker
-    # On indique au worker l'adresse du master
+      - "8081:8081"
     command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     volumes:
       - ./tp_projects:/opt/spark/work-dir
 
-  # Infrastructure de stockage: Data Lake
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+      - ./scripts:/scripts
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
+    restart: always
+    ports:
+      - "8082:8081" 
+    environment:    
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+
   namenode: 
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
     container_name: namenode
@@ -32,8 +50,8 @@ services:
       - CLUSTER_NAME=test
       - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
     ports:
-      - "9870:9870" # UI NameNode
-      - "9000:9000" # Communication HDFS
+      - "9870:9870"
+      - "9000:9000"
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
 
@@ -41,11 +59,11 @@ services:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
     container_name: datanode
     environment :
-      - CLUSTER-PRECONDITION=namenode:9870
+      - CLUSTER_PRECONDITION=namenode:9870
       - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
     ports:
-      - "9864:9864" # UI DataNode
-      - "9866:9866" # Communication HDFS
+      - "9864:9864"
+      - "9866:9866"
     volumes:
       - hadoop_datanode:/hadoop/dfs/data
     depends_on:
@@ -54,8 +72,9 @@ services:
 volumes:
   hadoop_namenode:
   hadoop_datanode:
+  mongo_data:
 
-  networks:
-    default:
-      name: spark-network
-      driver: bridge 
+networks:
+  default:
+    name: spark-network
+    driver: bridge
