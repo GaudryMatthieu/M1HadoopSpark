@@ -1,1 +1,2 @@
+*.csv filter=lfs diff=lfs merge=lfs -text
 tp_projects/lic-data-2023.csv filter=lfs diff=lfs merge=lfs -text
