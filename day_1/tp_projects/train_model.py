@@ -33,12 +33,12 @@ if __name__ == '__main__':
 
     logging.info("nb line " + str(df.count()))
 
-    indexer = StringIndexer(inputCol="vendeur_nom", outputCol="vendeur_index")
+    indexer = StringIndexer(inputCol="vendeur_nom", outputCol="vendeur_index", handleInvalid="keep")
     assembler = VectorAssembler(inputCols=["vendeur_index", "montant"], outputCol="features")
     lr = LogisticRegression(featuresCol="features", labelCol="label", maxIter=10)
 
-    model = Pipeline(stages=[indexer, assembler, lr])
-    # model = model.fit(data)
+    pipeline = Pipeline(stages=[indexer, assembler, lr])
+    model = pipeline.fit(data)
 
     model.write().overwrite().save("hdfs://namenode:9000/tp5/model_premium")
     logging.info("Saved model to HDFS")
